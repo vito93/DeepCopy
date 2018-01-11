@@ -5,7 +5,7 @@ import java.util.*
 
 class CopyUtils{
     companion object {
-        fun DeepCopy(obj: Any?):Any? {
+        fun DeepCopy(obj: Any?, copiedObjects: MutableMap<Any, Any>):Any? {
             if(obj == null) return obj
 
             val objClassJava = obj::class.java
@@ -17,8 +17,14 @@ class CopyUtils{
                     return obj
             }
 
+            if (copiedObjects.keys.contains(obj)) return copiedObjects.get(obj)
+
                 when (obj) {
-                    is String -> return obj.subSequence(0, obj.length - 1)//!!!
+                    is String -> {
+                            var newString = obj.subSequence(0, obj.length - 1)
+                            copiedObjects.put(obj, newString)
+                            return newString
+                    }
                     is Array<*> -> {
                         var arrList = ArrayList<Any>()
 
@@ -33,9 +39,17 @@ class CopyUtils{
                     is List<*> -> {
                         var arrList = ArrayList<Any>()
                          for (elem in obj){
-                            if(elem !=null) arrList.add(DeepCopy(elem)!!)
+                            if(elem != null){
+                                if(copiedObjects.containsKey(elem)) arrList.add(copiedObjects.get(elem)!!)
+                                else{
+                                    var copiedElem = DeepCopy(elem, copiedObjects)!!
+                                    copiedObjects.put(elem, copiedElem)
+                                    arrList.add(copiedElem)
+                                }
+                            }
                          }
 
+                        copiedObjects.put(obj, arrList)
                         return arrList
                     }
                     is Map<*, *> -> {
@@ -85,12 +99,18 @@ class CopyUtils{
                 }
             }
 
+        fun DeepCopy(obj:Any?): Any?{
+            var copiedObjects = mutableMapOf<Any, Any>()
+
+            return DeepCopy(obj, copiedObjects)
+        }
+
         fun PrintObject(obj: Any?){
             if(obj == null){
                 println("null")
                 return
             }
-            
+
             val properties = obj!!::class.memberProperties
 
             properties.forEach{
