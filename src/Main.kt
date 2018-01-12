@@ -3,15 +3,13 @@ import java.util.*
 
 fun main(args: Array<String>) {
     val a = A()
+    a.BObj.aClass = a!!
+
     var copy = CopyUtils.DeepCopy(a)
 
-    if (copy != null) {
-        println(a.hashCode())
-        println(copy.hashCode())
-        println(copy)
-    } else println("null")
-
     CopyUtils.PrintObject(copy)
+    println("______________")
+    CopyUtils.PrintObject(a.BObj)
 }
 
 class A() {
@@ -36,11 +34,13 @@ class A() {
     var nullableInt: Int? = null
     var date = Date()
 
-    val BObj = B()
+    var BObj = B()
+
 }
 
 class B() {
     var c = "foo"
     var d = "bar"
 
+    var aClass: A? = null
 }
