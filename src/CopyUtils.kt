@@ -21,7 +21,7 @@ class CopyUtils{
 
                 when (obj) {
                     is String -> {
-                            var newString = obj.subSequence(0, obj.length - 1)
+                            var newString = String(obj.toCharArray())
                             copiedObjects.put(obj, newString)
                             return newString
                     }
@@ -30,15 +30,7 @@ class CopyUtils{
                         var newArray:Any?
 
                          for (elem in obj) {
-                             if(elem != null) {
-                                 if(copiedObjects.containsKey(elem)) arrList.add(copiedObjects.get(elem))
-                                 else{
-                                     var copiedElem = DeepCopy(elem, copiedObjects)!!
-                                     copiedObjects.put(elem, copiedElem)
-                                     arrList.add(copiedElem)
-                                 }
-                             }
-                             else arrList.add(null)
+                             arrList.add(getValueFromCopiedCollection(elem, copiedObjects))
                          }
 
                         newArray = obj.clone()
@@ -49,44 +41,26 @@ class CopyUtils{
                     is List<*> -> {
                         var arrList = ArrayList<Any?>()
                          for (elem in obj){
-                            if(elem != null){
-                                if(copiedObjects.containsKey(elem)) arrList.add(copiedObjects.get(elem))
-                                else{
-                                    var copiedElem = DeepCopy(elem, copiedObjects)!!
-                                    copiedObjects.put(elem, copiedElem)
-                                    arrList.add(copiedElem)
-                                }
-                            }
-                             else arrList.add(null)
+                             arrList.add(getValueFromCopiedCollection(elem, copiedObjects))
                          }
-
                         copiedObjects.put(obj, arrList)
                         return arrList
                     }
                     is Map<*, *> -> {
-                        var newMap = mutableMapOf<Any, Any>() //!!!
+                        var newMap = mutableMapOf<Any?, Any?>() //!!!
 
                         for((key, value) in obj){
-                            if(key != null && value != null)
-                            newMap.put(DeepCopy(key, copiedObjects)!!, DeepCopy(value, copiedObjects)!!)
+                            newMap.put(getValueFromCopiedCollection(key, copiedObjects), getValueFromCopiedCollection(value, copiedObjects))
                         }
-
+                        copiedObjects.put(obj, newMap)
                         return newMap
                     }
                     is Set<*> -> {
-                        var newSet = mutableSetOf<Any>()
+                        var newSet = mutableSetOf<Any?>()
 
                         for(elem in obj){
-                            if(elem != null){
-                                if(copiedObjects.containsKey(elem)) newSet.add(copiedObjects.get(elem)!!)
-                                else {
-                                    var copiedElem = DeepCopy(elem, copiedObjects)!!
-                                    copiedObjects.put(elem, copiedElem)
-                                    newSet.add(copiedElem)
-                                }
-                            }
+                            newSet.add(getValueFromCopiedCollection(elem, copiedObjects))
                         }
-
                         copiedObjects.put(obj, newSet)
                         return newSet
                     }
@@ -108,23 +82,7 @@ class CopyUtils{
                                 else {
                                     println("null " + type.getTypeName() + " " + type.isPrimitive().toString())
                                 }
-
-                                if(value == null) field.set(newCopy, null)
-                                else {
-                                    if(copiedObjects.containsKey(value)) field.set(newCopy, copiedObjects.get(value))
-                                    else{
-                                        var tempValue: Any?
-
-                                        if(!value::class.java.isPrimitive()
-                                                && value::class.javaPrimitiveType == null
-                                                && !value::class.java.isArray)
-                                            tempValue = value::class.createInstance()
-
-                                        tempValue = DeepCopy(value, copiedObjects)
-                                        copiedObjects.put(value, tempValue!!)
-                                        field.set(newCopy, tempValue)
-                                    }
-                                }
+                                field.set(newCopy, getValueFromCopiedCollection(value, copiedObjects))
 
                             }
                         }
