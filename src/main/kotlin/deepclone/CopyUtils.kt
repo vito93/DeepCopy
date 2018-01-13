@@ -1,3 +1,5 @@
+package deepclone
+
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
 import kotlin.collections.*
@@ -80,11 +82,12 @@ class CopyUtils{
                                 var value = field.get(obj)
                                 var type = field.getType()
 
-                                if (value != null)
+                                /*if (value != null)
                                     println(prop.returnType.isMarkedNullable.toString() + " " + value.toString() + " " + type.getTypeName() + " " + type.isPrimitive().toString())
                                 else {
                                     println("null " + type.getTypeName() + " " + type.isPrimitive().toString())
-                                }
+                                }*/
+
                                 field.set(newCopy, getValueFromCopiedCollection(value, copiedObjects))
 
                             }
@@ -126,7 +129,8 @@ class CopyUtils{
             // Проверка на ссылочный объект и объект-неколлекцию.
             if(!value::class.java.isPrimitive()
                     && value::class.javaPrimitiveType == null
-                    && !value::class.java.isArray)
+                    && !value::class.java.isArray
+                    && (value !is Collection<*>))
                 tempValue = value::class.createInstance()
 
             // Если это исходный объект, добавляем его сюда.
