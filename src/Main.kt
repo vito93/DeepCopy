@@ -5,7 +5,7 @@ fun main(args: Array<String>) {
     val a = A()
     a.BObj.aClass = a!!
 
-    var copy = CopyUtils.DeepCopy(a)
+    var copy = CopyUtils.deepCopy(a)
 
     CopyUtils.PrintObject(copy)
     println("______________")
