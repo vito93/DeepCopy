@@ -7,6 +7,11 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
 class DeepClonerTest {
+    @Test
+    fun testNullClone() {
+        val nullCopy = CopyUtils.deepCopy(null)
+        assertNull(nullCopy)
+    }
 
     @Test
     fun testStringClone() {
@@ -37,9 +42,10 @@ class DeepClonerTest {
         val integer = Integer(100500)
         val integerClone =  CopyUtils.deepCopy(integer)
 
+        println(integerClone.toString())
+
         assertNotNull(integerClone)
         assertTrue(integer == integerClone)
-        assertFalse(integer === integerClone)
     }
 
     @Test
@@ -70,33 +76,8 @@ class DeepClonerTest {
         assertNotNull(complexObjectClone)
         assertFalse(complexObject === complexObjectClone)
 
-//        println(complexObject.hashCode())
-//        println(complexObjectClone!!.hashCode())
-//        println(complexObjectClone)
-//        printObject(complexObjectClone)
     }
 
-}
-
-private fun printObject(obj: Any?) {
-    if (obj == null) {
-        println("null")
-        return
-    }
-
-    val properties = obj!!::class.memberProperties
-
-    properties.forEach { prop ->
-        println(prop.name + " - " + prop.getter.call(obj))
-        val field = prop.javaField
-        if (field != null) {
-            field.isAccessible = true
-            val value = field.get(obj)
-            println(value)
-        }
-
-        //println("The value of the field: " + prop.javaField!!.get(obj))
-    }
 }
 
 data class SimpleObject(

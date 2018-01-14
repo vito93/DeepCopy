@@ -7,6 +7,24 @@ import java.util.*
 
 class CopyUtils{
     companion object {
+        // Вызываемый извне метод
+        fun <T: Any> deepCopy(obj: T?): T?{
+            // Для скопированных объектов будем использовать словарь соответствий оригинал-копия;
+            // в этот словарь будут заноситься только ссылочные типы
+            var copiedObjects = mutableMapOf<Any, Any>()
+
+            // Объявляем объект, ссылка которого будет содержать копию исходного. Нужно для проверки замкнутости на себя и проставление ссылки на него же самого.
+            // Вызовом функции getValueFromCopiedCollection заносим в общую коллекцию со ссылкой на новый экземпляр класса объекта
+            var initialObject: Any? = getValueFromCopiedCollection(obj, copiedObjects)
+            // Попробуем скопировать его как ссылочный
+            initialObject = deepCopy(obj, copiedObjects)
+
+            if(initialObject == null)
+                return null
+            else
+                return initialObject as T
+        }
+
         private fun<T: Any> deepCopy(obj: T?, copiedObjects: MutableMap<Any, Any>): T? {
             if(obj == null) return obj
 
@@ -82,12 +100,6 @@ class CopyUtils{
                                 var value = field.get(obj)
                                 var type = field.getType()
 
-                                /*if (value != null)
-                                    println(prop.returnType.isMarkedNullable.toString() + " " + value.toString() + " " + type.getTypeName() + " " + type.isPrimitive().toString())
-                                else {
-                                    println("null " + type.getTypeName() + " " + type.isPrimitive().toString())
-                                }*/
-
                                 field.set(newCopy, getValueFromCopiedCollection(value, copiedObjects))
 
                             }
@@ -99,21 +111,6 @@ class CopyUtils{
                     }
                 }
             }
-
-        // Вызываемый извне метод
-        fun <T: Any> deepCopy(obj: T?): T?{
-            // Для скопированных объектов будем использовать словарь соответствий оригинал-копия;
-            // в этот словарь будут заноситься только ссылочные типы
-            var copiedObjects = mutableMapOf<Any, Any>()
-
-            // Объявляем объект, ссылка которого будет содержать копию исходного. Нужно для проверки замкнутости на себя и проставление ссылки на него же самого.
-            // Вызовом функции getValueFromCopiedCollection заносим в общую коллекцию со ссылкой на новый экземпляр класса объекта
-            var initialObject: Any? = getValueFromCopiedCollection(obj, copiedObjects)
-            // Попробуем скопировать его как ссылочный
-            initialObject = deepCopy(obj, copiedObjects)
-
-            return initialObject as T
-        }
 
         // Используется для клонирования значений полей объектов и занесения исходного объекта в коллекцию сос ссылкой
         private fun<T: Any?> getValueFromCopiedCollection(value: Any?, copiedObjects: MutableMap<Any, Any>): T?{
@@ -143,29 +140,6 @@ class CopyUtils{
             else copiedObjects.put(value, tempValue)
 
             return tempValue as T
-        }
-
-        fun PrintObject(obj: Any?){
-            if(obj == null){
-                println("null")
-                return
-            }
-
-            val properties = obj!!::class.memberProperties
-
-            properties.forEach{
-                prop ->
-
-                println(prop.name + " - " + prop.getter.call(obj))
-                    var field = prop.javaField
-                    if(field != null){
-                        field.setAccessible(true);
-                        var value = field.get(obj)
-                        println(value)
-                }
-
-                //println("The value of the field: " + prop.javaField!!.get(obj))
-            }
         }
     }
 }

@@ -8,10 +8,6 @@ fun main(args: Array<String>) {
     a.BObj.aClass = a!!
 
     var copy = CopyUtils.deepCopy(a)
-
-    CopyUtils.PrintObject(copy)
-    println("______________")
-    CopyUtils.PrintObject(a.BObj)
 }
 
 class A() {
